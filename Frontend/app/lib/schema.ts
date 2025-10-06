@@ -1,0 +1,37 @@
+import { z } from "zod";
+
+// 🔹 Signin Schema
+export const SigninSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+// 🔹 Signup Schema
+export const SignupSchema = z.object({
+  name: z.string().min(2, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Confirm password is required"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+// 🔹 Forget Password Schema
+export const ForgetPasswordSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+// 🔹 Reset Password Schema
+export const ResetPasswordSchema = z.object({
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Confirm password is required"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+// 🔹 Verify Email Schema
+export const VerifyEmailSchema = z.object({
+  code: z.string().length(6, "Verification code must be 6 characters"),
+});
