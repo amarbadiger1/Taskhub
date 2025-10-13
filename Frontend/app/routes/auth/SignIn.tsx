@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { use } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,11 +18,17 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useLoginMutation } from "~/hooks/use-auth";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "~/provider/auth-context";
 
 type SigninFormData = z.infer<typeof SigninSchema>;
 
 const Signin = () => {
+  const navigate=useNavigate();
+  const {login}=useAuth();
   const form = useForm<SigninFormData>({
     resolver: zodResolver(SigninSchema),
     defaultValues: {
@@ -31,8 +37,23 @@ const Signin = () => {
     },
   });
 
+  const {mutate,isPending}= useLoginMutation();
   const handleOnSubmit = (values: SigninFormData) => {
-    console.log("✅ Submitted:", values);
+    mutate(values,{
+      onSuccess:(data)=>{
+        login(data);
+        console.log("Login successful:",data);
+        toast.success("Login successful!");
+        navigate('/dashboard');
+        // Handle successful login, e.g., redirect or show a success message
+      },
+      onError:(error:any)=>{
+        const errorMessage=error.response?.data?.message || "An error occurred during login.";
+        console.log("Login error:",error);
+        toast.error(errorMessage);
+        // Handle login error, e.g., show an error message
+      }
+    });
   };
 
   return (
@@ -76,8 +97,8 @@ const Signin = () => {
                 )}
               />
 
-              <Button type="submit" className="w-full">
-                Sign In
+              <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending ? <Loader2 className=" w-4 h-4 animate-spin" /> : "Sign In"}
               </Button>
             </form>
           </Form>

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { use } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,13 +18,15 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Link } from "react-router";
+import { Link, useNavigate, useNavigationType } from "react-router";
 import { useSignUpMutation } from "~/hooks/use-auth";
 import { toast } from "sonner";
 
 export type SignupFormData = z.infer<typeof SignupSchema>;
 
 const SignUp = () => {
+
+  const navigate = useNavigate();
   const form = useForm<SignupFormData>({
     resolver: zodResolver(SignupSchema),
     defaultValues: {
@@ -35,20 +37,26 @@ const SignUp = () => {
     },
   });
 
-  const { mutate,isPending } = useSignUpMutation();
+  const { mutate, isPending } = useSignUpMutation();
 
   const handleOnSubmit = (values: SignupFormData) => {
     // console.log("✅ Signup Submitted:", values);
-    mutate(values,{
-      onSuccess:(data)=>{
-        toast.success("User registered successfully");
+    mutate(values, {
+      onSuccess: () => {
+        toast.success("Email Verification Required", { description: "Please check your email your for verification Link. if you dont see it , please check your spam folder." });
+
+        form.reset();
+        navigate("/signin");
+
       },
-      onError:(error:any)=>{
-        const errorMessage=error.response?.data?.message || "An error occurred";
+      onError: (error: any) => {
+        const errorMessage = error.response?.data?.message || "An error occurred";
         console.log("❌ Signup Error:", error);
         toast.error(errorMessage);
       }
     });
+
+
   };
 
   return (
@@ -122,8 +130,8 @@ const SignUp = () => {
                 )}
               />
 
-              <Button type="submit" className="w-full">
-                Sign Up
+              <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending ? "Signing Up..." : "Sign Up"}
               </Button>
             </form>
           </Form>

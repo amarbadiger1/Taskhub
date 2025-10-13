@@ -19,7 +19,7 @@ export const SignupSchema = z.object({
 
 // 🔹 Forget Password Schema
 export const ForgetPasswordSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("Invalid email address"),  
 });
 
 // 🔹 Reset Password Schema
@@ -35,3 +35,15 @@ export const ResetPasswordSchema = z.object({
 export const VerifyEmailSchema = z.object({
   code: z.string().length(6, "Verification code must be 6 characters"),
 });
+
+export const resetPasswordSchema=z.object({
+  newPassword:z.string().min(8,"Password must be 8 characters"),
+  confirmPassword:z.string().min(8,"Password must be 8 characters"),
+}).refine((data)=>data.newPassword === data.confirmPassword,{
+  path:["confirmPassword"],
+  message:"Passwords do not match",
+})
+
+export const forgotPasswordSchema=z.object({
+  email:z.string().email("Invaild email address"),
+})

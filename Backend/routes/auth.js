@@ -1,8 +1,8 @@
 import express from 'express';
 import {z} from 'zod';
 import {validateRequest} from "zod-express-middleware";
-import { loginSchema, registerSchema } from '../libs/validateSchema.js';
-import { loginUser, registerUser } from '../controllers/authController.js';
+import { loginSchema, registerSchema, resetPasswordSchema, verifyEmailSchema,emailSchema } from '../libs/validateSchema.js';
+import { loginUser, registerUser, resetPasswordRequest, verifyEmail, verifyResetPasswordTokenAndResetPassword } from '../controllers/authController.js';
 
 const router = express.Router();
 
@@ -18,6 +18,27 @@ router.post('/login',
         body: loginSchema
     }),
     loginUser
+);
+
+router.post('/verify-email', 
+    validateRequest({ 
+        body: verifyEmailSchema 
+    }), 
+    verifyEmail);
+
+router.post("/reset-password-request",
+    validateRequest({
+        body:emailSchema,
+    }),resetPasswordRequest
+);
+
+
+router.post(
+    "/reset-password",
+    validateRequest({
+        body:resetPasswordSchema,
+    }),
+    verifyResetPasswordTokenAndResetPassword
 );
 
 export default router;
