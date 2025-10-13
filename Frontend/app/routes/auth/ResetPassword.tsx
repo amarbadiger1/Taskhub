@@ -5,7 +5,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Link, useSearchParams } from 'react-router';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form';
+import { Button } from '~/components/ui/button';
+import { Input } from '~/components/ui/input';
+import { useResetPasswordMutation } from '~/hooks/use-auth';
+import { toast } from 'sonner';
+
 
 type ResetPasswordFormData=z.infer<typeof resetPasswordSchema>;
 
@@ -16,6 +22,9 @@ const ResetPassword = () => {
 
   const [isSuccess,setIsSuccess]=useState(false);
 
+  const {mutate:resetPassword,isPending}=useResetPasswordMutation();
+
+
   const form=useForm<ResetPasswordFormData>({
     resolver:zodResolver(resetPasswordSchema),
     defaultValues:{
@@ -24,9 +33,24 @@ const ResetPassword = () => {
     }
   });
 
-  const onSumbit=(data:ResetPasswordFormData)=>{
-    console.log(data);
-  }
+  const onSumbit=(values:ResetPasswordFormData)=>{
+    if(!token){
+      toast.error("Invaild Token");
+      return;
+    }
+
+    resetPassword({...values,token:token as string},
+    {
+        onSuccess:()=>{
+          setIsSuccess(true);
+        },
+        onError:(error:any)=>{
+          const errorMessage=error.response?.data?.message;
+          toast.error(errorMessage);
+          console.log(error);
+        },
+      });
+  };
 
 
   return (
@@ -44,7 +68,56 @@ const ResetPassword = () => {
             </Link>
           </CardHeader>
           <CardContent>
-            
+            {isSuccess ? (
+              <div className='flex flex-col items-center justify-center'>
+                <CheckCircle className='w-10 h-10 text-green-500' />
+                <h1 className='text-2xl font-bold'>
+                  Password reset successfully
+                </h1>
+              </div>
+            ) : (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSumbit)} className='space-y-6'>
+                   <FormField 
+                      name="newPassword"
+                      control={form.control}
+                      render={({field})=>(
+                        <FormItem>
+                          <FormLabel>New Password</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder='Enter your new password' />
+                          </FormControl>
+                          <FormMessage/>
+                        </FormItem>
+                      )}
+                      />
+
+                      <FormField 
+                      name="confirmPassword"
+                      control={form.control}
+                      render={({field})=>(
+                        <FormItem>
+                          <FormLabel>Confirm Password</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder='Enter your confirm Password' />
+                          </FormControl>
+                          <FormMessage/>
+                        </FormItem>
+                      )}
+                      />
+
+                      <Button type="submit" className='w-full' disabled={isPending}>
+                      {isPending ? (
+                        <Loader2 className='w-4 h-4 animate-spin'/> 
+                      ):( 
+                        "Reset Password"
+                      )}
+                      </Button>
+
+
+                </form>
+              </Form>
+            )}
           </CardContent>
         </Card>
       </div>
