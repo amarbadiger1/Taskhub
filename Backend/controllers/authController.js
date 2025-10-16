@@ -333,12 +333,10 @@ const loginUser = async (req, res) => {
             .json({ message: "Error in sending verification email" });
         }
 
-        res
-          .status(201)
-          .json({
-            message:
-              "Verification email sent Please check your inbox. please verify your email address.",
-          });
+        res.status(201).json({
+          message:
+            "Verification email sent Please check your inbox. please verify your email address.",
+        });
       }
     }
 
@@ -356,12 +354,13 @@ const loginUser = async (req, res) => {
     user.lastlogin = new Date();
     await user.save();
 
-    const userData=user.toObject();
+    const userData = user.toObject();
     delete userData.password;
     // delete userData.twoFAotp;
     // delete userData.twoFAotpExpiry;
-    res.status(200).json({ message: "Login Successful", token, user: userData });
-
+    res
+      .status(200)
+      .json({ message: "Login Successful", token, user: userData });
   } catch (error) {
     console.log(error);
 
@@ -381,32 +380,34 @@ const resetPasswordRequest = async (req, res) => {
       return res.status(400).json({ message: "Email not verified" });
     }
 
-    const existingVerification=await Verification.findOne({userId:user._id});
-    
-    if(existingVerification && existingVerification.expiresAt > new Date()){
+    const existingVerification = await Verification.findOne({
+      userId: user._id,
+    });
+
+    if (existingVerification && existingVerification.expiresAt > new Date()) {
       return res.status(400).json({
-        message:"Reset password request already sent",
+        message: "Reset password request already sent",
       });
     }
-    
-    if(existingVerification && existingVerification.expiresAt < new Date()){
+
+    if (existingVerification && existingVerification.expiresAt < new Date()) {
       await Verification.findByIdAndDelete(existingVerification._id);
     }
-    
-    const resetPasswordToken=jwt.sign(
-      {userId:user._id,purpose:"reset-password"},
+
+    const resetPasswordToken = jwt.sign(
+      { userId: user._id, purpose: "reset-password" },
       process.env.JWT_SECRET,
-      {expiresIn:"15m"}
+      { expiresIn: "15m" }
     );
 
     await Verification.create({
-      userId:user._id,
-      token:resetPasswordToken,
-      expiresAt:new Date(Date.now()+15*60*1000),
+      userId: user._id,
+      token: resetPasswordToken,
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000),
     });
 
-    const resetPasswordLink=`${process.env.FRONTEND_URL}/reset-password?token=${resetPasswordToken}`;
-    const emailBody=`<!DOCTYPE html>
+    const resetPasswordLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetPasswordToken}`;
+    const emailBody = `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -487,78 +488,91 @@ const resetPasswordRequest = async (req, res) => {
   </body>
 </html>
 `;
-    const emailSubject="Reset your password";
+    const emailSubject = "Reset your password";
 
-    const isEmailSent=await sendEmail(email,emailSubject,emailBody);
+    const isEmailSent = await sendEmail(email, emailSubject, emailBody);
 
-    if(!isEmailSent){
+    if (!isEmailSent) {
       return res.status(500).json({
-        message:"Failed to send reset password email",
+        message: "Failed to send reset password email",
       });
     }
 
-    res.status(200).json({message:"Reset password email sent "})
-
-  } catch (error){
-    console.log(error);
-    res.status(500).json({message:"Internal server Error"});
-  }
-}
-
-
-
-const verifyResetPasswordTokenAndResetPassword = async (req,res)=>{
-  try {
-    const {token,newPassword,confirmPassword}=req.body;
-    const payload=jwt.verify(token,process.env.JWT_SECRET);
-
-    if(!payload){
-      return res.status(401).json({message:"Unauthorized"});
-    }
-
-    const {userId,purpose}=payload;
-    if(purpose !== "reset-password"){
-      return res.status(401).json({message:"Unauthoized"});
-    }
-
-    const verification=await Verification.findOne({
-      userId,
-      token,
-    });
-
-    if(!verification){
-      return res.status(401).json({message:"Unauthorized"});
-    }
-
-    const isTokenExpired=verification.expiresAt < new Date();
-
-    if(isTokenExpired){
-      res.status(401).json({message:"Token Expired"});
-    }
-
-    const user=await User.findById(userId);
-
-    if(!user){
-      return res.status(401).json({message:"Unauthorized"});
-    }
-
-    if(newPassword !== confirmPassword){
-      return res.status(400).json({message:"Passwords do not match"});
-    }
-
-    const salt=await bcrypt.genSalt(10);
-    const hashedPassword=await bcrypt.hash(newPassword,salt);
-
-    user.password=hashedPassword;
-    await user.save();
-
-    await Verification.findByIdAndDelete(verification._id);
-
+    res.status(200).json({ message: "Reset password email sent " });
   } catch (error) {
     console.log(error);
-    res.status(500).json({message:"Internal Server Error"});
+    res.status(500).json({ message: "Internal server Error" });
   }
-}
+};
 
+const verifyResetPasswordTokenAndResetPassword = async (req, res) => {
+  try {
+    const { token, newPassword, confirmPassword } = req.body;
 
-export { registerUser, loginUser, verifyEmail, resetPasswordRequest ,verifyResetPasswordTokenAndResetPassword};
+    // Verify JWT
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    if (!payload) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { userId, purpose } = payload;
+
+    // Ensure the token is meant for password reset
+    if (purpose !== "reset-password") {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Find verification record
+    const verification = await Verification.findOne({ userId, token });
+    if (!verification) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Check token expiration
+    const isTokenExpired = verification.expiresAt < new Date();
+    if (isTokenExpired) {
+      await Verification.findByIdAndDelete(verification._id);
+      return res.status(401).json({ message: "Token expired" });
+    }
+
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Check password match
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    // Hash and save new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
+    await user.save();
+
+    // Delete verification record
+    await Verification.findByIdAndDelete(verification._id);
+
+    // ✅ Send success response
+    return res.status(200).json({ message: "Password reset successful" });
+  } catch (error) {
+    console.error(error);
+    if (
+      error.name === "JsonWebTokenError" ||
+      error.name === "TokenExpiredError"
+    ) {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export {
+  registerUser,
+  loginUser,
+  verifyEmail,
+  resetPasswordRequest,
+  verifyResetPasswordTokenAndResetPassword,
+};
