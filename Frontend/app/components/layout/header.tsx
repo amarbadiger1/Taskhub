@@ -4,7 +4,7 @@ import { Button } from "../ui/button"
 import { Bell, PlusCircle } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
-import { Link } from "react-router"
+import { Link, useLoaderData } from "react-router"
 import { WorkspaceAvatar } from "../workspace/WorkspaceAvatar"
 
 interface HeaderProps {
@@ -18,8 +18,11 @@ export const Header = ({
     selectedWorkspace,
     onCreateWorkspace,
 }: HeaderProps) => {
+
     const { user, logout } = useAuth()
-    const workspaces=[];
+    const { workspaces } = useLoaderData() as { workspaces: Workspace[] };
+    // console.log(workspaces);
+
     return (
         <div className="bg-background sticky top-0 z-40 border-b">
             <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
@@ -59,11 +62,11 @@ export const Header = ({
                         </DropdownMenuGroup>
                         <DropdownMenuGroup>
                             <DropdownMenuItem onClick={onCreateWorkspace}>
-                                <PlusCircle className="w-4 h-4 mr-2"/>
+                                <PlusCircle className="w-4 h-4 mr-2" />
                                 Create Workspace
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
-                        
+
                     </DropdownMenuContent>
 
 
@@ -76,7 +79,7 @@ export const Header = ({
                     </Button>
 
                     <DropdownMenu>
-                        <DropdownMenuTrigger>
+                        <DropdownMenuTrigger asChild>
                             <button>
                                 <Avatar>
                                     <AvatarImage src={user?.profilePicture} />
