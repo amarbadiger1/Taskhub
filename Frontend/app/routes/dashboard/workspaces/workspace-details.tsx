@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router";
 import { Loader } from "~/components/loader";
-import { WorkSpaceHeader } from "~/components/workspace/workspace-header";
+import { WorkspaceHeader } from "~/components/workspace/workspace-header";
 import { useGetWorkspaceQuery } from "~/hooks/use-workspace";
 import type { Project, Workspace } from "~/types";
 
@@ -31,7 +31,7 @@ const WorkspaceDetails = () => {
     }
 
     return <div className="space-y-8">
-        <WorkSpaceHeader
+        <WorkspaceHeader
             workspace={data.workspace}
             members={data?.workspace?.members as any}
             onCreateProject={() => setIsCreateProject(true)}
