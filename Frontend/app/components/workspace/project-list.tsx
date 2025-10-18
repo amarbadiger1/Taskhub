@@ -1,4 +1,3 @@
-
 import type { Project } from "~/types";
 import { NoDataFound } from "../no-data-found";
 import { ProjectCard } from "../project/project-card";
@@ -7,7 +6,6 @@ import { ProjectCard } from "../project/project-card";
 interface ProjectListProps {
     workspaceId: string;
     projects: Project[];
-
     onCreateProject: () => void;
 }
 
