@@ -1,28 +1,28 @@
-import {createContext, use, useContext, useEffect, useState} from 'react';
+import { createContext, use, useContext, useEffect, useState } from 'react';
 import type { User } from '~/types';
 import { queryClient } from './React-query-provider';
 import { useLocation, useNavigate } from 'react-router';
 import { publicRoutes } from '~/lib';
 
-interface AuthContextType { 
+interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (data:any) => Promise<void>;
+    login: (data: any) => Promise<void>;
     logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 
-export const AuthProvider = ({children}: {children: React.ReactNode}) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const navigate = useNavigate();
     const cuurrentPath = useLocation().pathname;
-    const ispublicRoute=publicRoutes.includes(cuurrentPath);
+    const ispublicRoute = publicRoutes.includes(cuurrentPath);
 
     //check if user is authenticated
     useEffect(() => {
@@ -34,9 +34,9 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
             if (userInfo) {
                 setUser(JSON.parse(userInfo));
                 setIsAuthenticated(true);
-            }else{
+            } else {
                 setIsAuthenticated(false);
-                if(!ispublicRoute){
+                if (!ispublicRoute) {
                     navigate('/signin');
                 }
             }
@@ -44,18 +44,18 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
         };
         checkAuth();
     }, []);
-      
+
 
     useEffect(() => {
-        const handleLogout=()=>{
+        const handleLogout = () => {
             logout();
             navigate('/signin');
         };
-        window.addEventListener('force-logout',handleLogout);
+        window.addEventListener('force-logout', handleLogout);
         return () => {
-            window.removeEventListener('force-logout',handleLogout);
+            window.removeEventListener('force-logout', handleLogout);
         };
-    },[]);
+    }, []);
 
 
     const login = async (data: any) => {
@@ -74,7 +74,7 @@ export const AuthProvider = ({children}: {children: React.ReactNode}) => {
         // console.log('User logged out');
     };
 
-    const values={
+    const values = {
         user,
         isAuthenticated,
         isLoading,

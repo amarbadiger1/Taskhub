@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const workspaceSchema = new Schema(
   {
@@ -36,6 +36,6 @@ const workspaceSchema = new Schema(
   { timestamps: true }
 );
 
-const Workspace = model("Workspace", workspaceSchema);
+const Workspace = mongoose.model("Workspace", workspaceSchema);
 
 export default Workspace;
