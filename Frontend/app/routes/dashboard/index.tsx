@@ -13,8 +13,8 @@ import type {
   TaskTrendsData,
   WorkspaceProductivityData,
 } from "~/types";
+import { motion } from "framer-motion";
 import { useSearchParams } from "react-router";
-
 
 const Dashboard = () => {
   const [searchParams] = useSearchParams();
@@ -33,6 +33,23 @@ const Dashboard = () => {
     isPending: boolean;
   };
 
+  if (!workspaceId) {
+    return (
+      <div className="flex items-center justify-center h-[70vh]">
+        <motion.h1
+          initial={{ opacity: 0, y: -20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-3xl md:text-4xl font-extrabold text-blue-500 text-center"
+        >
+          <span className="inline-block bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-600 bg-clip-text text-transparent animate-pulse">
+            Please Select the Workspace Above
+          </span>
+        </motion.h1>
+      </div>
+    );
+  }
+
   if (isPending) {
     return (
       <div>
@@ -42,26 +59,59 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-8 2xl:space-y-12">
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
+      className="space-y-8 2xl:space-y-12"
+    >
+      {/* Header Section */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <motion.h1
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-2xl font-bold"
+        >
+          Dashboard
+        </motion.h1>
       </div>
 
-      <StatsCard data={data.stats} />
+      {/* Stats Cards */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+      >
+        <StatsCard data={data.stats} />
+      </motion.div>
 
-      <StatisticsCharts
-        stats={data.stats}
-        taskTrendsData={data.taskTrendsData}
-        projectStatusData={data.projectStatusData}
-        taskPriorityData={data.taskPriorityData}
-        workspaceProductivityData={data.workspaceProductivityData}
-      />
+      {/* Charts Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 25 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <StatisticsCharts
+          stats={data.stats}
+          taskTrendsData={data.taskTrendsData}
+          projectStatusData={data.projectStatusData}
+          taskPriorityData={data.taskPriorityData}
+          workspaceProductivityData={data.workspaceProductivityData}
+        />
+      </motion.div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      {/* Projects & Tasks Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        className="grid gap-6 lg:grid-cols-2"
+      >
         <RecentProjects data={data.recentProjects} />
         <UpcomingTasks data={data.upcomingTasks} />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

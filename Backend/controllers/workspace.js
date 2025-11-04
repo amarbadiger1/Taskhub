@@ -24,7 +24,7 @@ const createWorkspace = async (req, res) => {
       ],
     });
 
-    res.status(201).json(workspace);
+    res.status(201).json({ workspace });
   } catch (error) {
     console.log(error);
     res.status(500).json({

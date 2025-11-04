@@ -111,6 +111,27 @@ const getProjectTasks = async (req, res) => {
       .populate("assignees", "name profilePicture")
       .sort({ createdAt: -1 });
 
+    // ✅ Calculate progress dynamically
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter((t) => t.status === "Done").length;
+    const progress =
+      totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    // ✅ Determine project status based on progress
+    let newStatus = project.status;
+    if (totalTasks > 0) {
+      if (completedTasks === totalTasks) newStatus = "Completed";
+      else if (completedTasks > 0) newStatus = "In Progress";
+      else newStatus = "Planning";
+    }
+
+    // ✅ Update project in DB if values changed
+    if (project.progress !== progress || project.status !== newStatus) {
+      project.progress = progress;
+      project.status = newStatus;
+      await project.save();
+    }
+
     res.status(200).json({
       project,
       tasks,

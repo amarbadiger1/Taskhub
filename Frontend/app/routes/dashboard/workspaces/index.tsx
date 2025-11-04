@@ -1,6 +1,7 @@
 import { PlusCircle, Users } from 'lucide-react';
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { Link } from 'react-router';
+import { motion } from 'framer-motion';
 import { Loader } from '~/components/loader';
 import { NoDataFound } from '~/components/no-data-found';
 import { Button } from '~/components/ui/button';
@@ -9,7 +10,7 @@ import { CreateWorkspace } from '~/components/workspace/createWorkspace';
 import { WorkspaceAvatar } from '~/components/workspace/WorkspaceAvatar';
 import { useGetWorkspacesQuery } from '~/hooks/use-workspace';
 import type { Workspace } from '~/types';
-import { format } from "date-fns";
+import { format } from 'date-fns';
 
 const Workspaces = () => {
     const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
@@ -18,35 +19,48 @@ const Workspaces = () => {
         isLoading: boolean;
     };
 
-    if (isLoading) {
-        return <Loader />
-    }
+    if (isLoading) return <Loader />;
+
     return (
         <>
-            <div className="space-y-8">
-                <div className='flex items-center justify-between'>
-                    <h2 className='text-xl md:text-3xl font-bold'>Workspaces</h2>
+            {/* Page animation wrapper */}
+            <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, ease: 'easeOut' }}
+                className="space-y-8"
+            >
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl md:text-3xl font-bold">Workspaces</h2>
                     <Button onClick={() => setIsCreatingWorkspace(true)}>
-                        <PlusCircle className='size-4 mr-2' />
+                        <PlusCircle className="size-4 mr-2" />
                         New Workspace
                     </Button>
                 </div>
+
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {
-                        workspaces.map((ws) => (
-                            <WorkspaceCard key={ws._id} workspace={ws} />
+                    {workspaces.length > 0 ? (
+                        workspaces.map((ws, index) => (
+                            <motion.div
+                                key={ws._id}
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                            >
+                                <WorkspaceCard workspace={ws} />
+                            </motion.div>
                         ))
-                    }
-                    {
-                        workspaces.length === 0 && <NoDataFound
+                    ) : (
+                        <NoDataFound
                             title="No workspaces found"
                             description="Create a new workspace to get started"
                             buttonText="Create Workspace"
                             buttonAction={() => setIsCreatingWorkspace(true)}
                         />
-                    }
+                    )}
                 </div>
-            </div>
+            </motion.div>
+
             <CreateWorkspace
                 isCreatingWorkspace={isCreatingWorkspace}
                 setIsCreatingWorkspace={setIsCreatingWorkspace}
@@ -65,33 +79,27 @@ const WorkspaceCard = ({ workspace }: { workspace: Workspace }) => {
                             <WorkspaceAvatar name={workspace.name} color={workspace.color} />
                             <div>
                                 <CardTitle>{workspace.name}</CardTitle>
-                                <span className='text-xs text-muted-foreground'>
-                                    Created At {format(workspace.createdAt, "MMM d, yyyy h:mm a")}
+                                <span className="text-xs text-muted-foreground">
+                                    Created At {format(workspace.createdAt, 'MMM d, yyyy h:mm a')}
                                 </span>
                             </div>
                         </div>
-                        <div className='flex items-center text-muted-foreground'>
-                            <Users className='size-4 mr-1' />
-                            <span className='text-xs'> {workspace.members.length} </span>
+                        <div className="flex items-center text-muted-foreground">
+                            <Users className="size-4 mr-1" />
+                            <span className="text-xs">{workspace.members.length}</span>
                         </div>
                     </div>
 
-                    <CardDescription>
-                        {workspace.description || "No description"}
-                    </CardDescription>
+                    <CardDescription>{workspace.description || 'No description'}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className='text-sm text-muted-foreground'>
+                    <div className="text-sm text-muted-foreground">
                         View workspace details and projects
                     </div>
                 </CardContent>
-
             </Card>
         </Link>
     );
 };
 
-
-
-
-export default Workspaces
+export default Workspaces;

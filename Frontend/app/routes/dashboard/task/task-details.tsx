@@ -175,14 +175,14 @@ const TaskDetails = () => {
                             <div className="flex items-center gap-2 mt-4 md:mt-0">
                                 <TaskStatusSelector status={task.status} taskId={task._id} />
 
-                                <Button
+                                {/* <Button
                                     variant={"destructive"}
                                     size="sm"
                                     onClick={() => { }}
                                     className="hidden md:block"
                                 >
                                     Delete Task
-                                </Button>
+                                </Button> */}
                             </div>
                         </div>
 

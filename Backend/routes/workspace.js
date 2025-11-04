@@ -14,7 +14,7 @@ import {
   inviteMemberSchema,
   tokenSchema,
   workspaceSchema,
-} from "../libs/validate-schema.js";
+} from "../libs/validateSchema.js";
 import authMiddleware from "../middleware/auth-middleware.js";
 import { z } from "zod";
 

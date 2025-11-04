@@ -15,6 +15,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { UseProjectQuery } from "~/hooks/use-project";
 import { BackButton } from "~/components/back-button";
+import { motion } from "framer-motion"; // ✅ Added for animation
 
 const ProjectDetails = () => {
     const { projectId, workspaceId } = useParams<{
@@ -51,7 +52,12 @@ const ProjectDetails = () => {
     };
 
     return (
-        <div className="space-y-8">
+        <motion.div
+            className="space-y-8"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+        >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <BackButton />
@@ -173,14 +179,13 @@ const ProjectDetails = () => {
                 </Tabs>
             </div>
 
-            {/* create    task dialog */}
             <CreateTaskDialog
                 open={isCreateTask}
                 onOpenChange={setIsCreateTask}
                 projectId={projectId!}
                 projectMembers={project.members as any}
             />
-        </div>
+        </motion.div>
     );
 };
 
@@ -231,12 +236,15 @@ const TaskColumn = ({
                             No tasks yet
                         </div>
                     ) : (
-                        tasks.map((task) => (
-                            <TaskCard
+                        tasks.map((task, index) => (
+                            <motion.div
                                 key={task._id}
-                                task={task}
-                                onClick={() => onTaskClick(task._id)}
-                            />
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.05 * index, duration: 0.4 }}
+                            >
+                                <TaskCard task={task} onClick={() => onTaskClick(task._id)} />
+                            </motion.div>
                         ))
                     )}
                 </div>
@@ -271,13 +279,10 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
                                 variant={"ghost"}
                                 size={"icon"}
                                 className="size-6"
-                                onClick={() => {
-                                    console.log("mark as to do");
-                                }}
+                                onClick={() => console.log("mark as to do")}
                                 title="Mark as To Do"
                             >
                                 <AlertCircle className={cn("size-4")} />
-                                <span className="sr-only">Mark as To Do</span>
                             </Button>
                         )}
                         {task.status !== "In Progress" && (
@@ -285,13 +290,10 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
                                 variant={"ghost"}
                                 size={"icon"}
                                 className="size-6"
-                                onClick={() => {
-                                    console.log("mark as in progress");
-                                }}
+                                onClick={() => console.log("mark as in progress")}
                                 title="Mark as In Progress"
                             >
                                 <Clock className={cn("size-4")} />
-                                <span className="sr-only">Mark as In Progress</span>
                             </Button>
                         )}
                         {task.status !== "Done" && (
@@ -299,13 +301,10 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
                                 variant={"ghost"}
                                 size={"icon"}
                                 className="size-6"
-                                onClick={() => {
-                                    console.log("mark as done");
-                                }}
+                                onClick={() => console.log("mark as done")}
                                 title="Mark as Done"
                             >
                                 <CheckCircle className={cn("size-4")} />
-                                <span className="sr-only">Mark as Done</span>
                             </Button>
                         )}
                     </div>
@@ -313,7 +312,7 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
             </CardHeader>
 
             <CardContent>
-                <h4 className="ont-medium mb-2">{task.title}</h4>
+                <h4 className="font-medium mb-2">{task.title}</h4>
 
                 {task.description && (
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
@@ -352,7 +351,7 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
                         </div>
                     )}
                 </div>
-                {/* 5/10 subtasks */}
+
                 {task.subtasks && task.subtasks.length > 0 && (
                     <div className="mt-2 text-xs text-muted-foreground">
                         {task.subtasks.filter((subtask) => subtask.completed).length} /{" "}

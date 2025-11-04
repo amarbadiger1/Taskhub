@@ -7,12 +7,13 @@ import { Loader } from "~/components/loader";
 import { CreateProjectDialog } from "~/components/project/create-project";
 import { WorkspaceHeader } from "~/components/workspace/workspace-header";
 import { useGetWorkspaceQuery } from "~/hooks/use-workspace";
+import { InviteMemberDialog } from "~/components/workspace/invite-member";
 
 const WorkspaceDetails = () => {
     const { workspaceId } = useParams<{ workspaceId: string }>();
     const [isCreateProject, setIsCreateProject] = useState(false);
     const [isInviteMember, setIsInviteMember] = useState(false);
-
+    console.log("hello i am from workspace Details", workspaceId);
     if (!workspaceId) {
         return <div>No workspace found</div>;
     }
@@ -56,12 +57,12 @@ const WorkspaceDetails = () => {
                 workspaceId={workspaceId}
                 workspaceMembers={data.workspace.members as any}
             />
-            {/* 
+
             <InviteMemberDialog
                 isOpen={isInviteMember}
                 onOpenChange={setIsInviteMember}
                 workspaceId={workspaceId}
-            /> */}
+            />
         </div>
     );
 };
